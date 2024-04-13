@@ -9,7 +9,6 @@ import {
 import type { LinksFunction } from "@remix-run/node";
 import stylesheet from "~/tailwind.css?url";
 import Header from "./components/header";
-import Footer from "./components/footer";
 
 
 export const links: LinksFunction = () => [
@@ -28,13 +27,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </head>
         <body className="flex-grow flex flex-col">
           <Header />
-          <main className="flex-grow">{children}</main>
+          <main className="content">{children}</main>
           <ScrollRestoration />
           <Scripts />            
         </body>
-        <footer className="footer">
-          <Footer />
-        </footer>
       </html>
     </div>
   );

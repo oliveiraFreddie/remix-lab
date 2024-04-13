@@ -12,7 +12,7 @@ export default function Header() {
     <header className="bg-gray-800 py-4">
       <div className="container mx-auto flex justify-between items-center px-4">
         <Link to="/" className="text-white font-bold text-lg">
-          Meu Logo
+          Remix Lab
         </Link>
 
         <div className="md:flex space-x-4 hidden">
