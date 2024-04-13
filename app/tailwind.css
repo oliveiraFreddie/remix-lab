@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.footer {
+    bottom: 0;
+    position: fixed;
+    width: 100%;
+}
