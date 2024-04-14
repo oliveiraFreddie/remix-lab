@@ -1,0 +1,133 @@
+import { Form, useLoaderData, useRouteError, isRouteErrorResponse, useNavigate, useFetcher, Link } from "@remix-run/react";
+import { type ActionFunctionArgs, json, type LoaderFunctionArgs } from "@remix-run/node";
+import type { FunctionComponent } from "react";
+
+import type { ContactRecord } from "../data.server";
+
+import { getContact, updateContactById } from "../data.server";
+import invariant from "tiny-invariant";
+
+// loader information from API
+export async function loader({params} : LoaderFunctionArgs ) {
+    invariant(params.contactId, "Missing contactId param"); // funtion to check id
+    const contactId = params.contactId;
+    const contact = await getContact(contactId);
+    if (!contact) throw new Response("Not Found", { status: 404});
+    return json(contact);
+}
+
+export async function action({params, request} : ActionFunctionArgs) {
+  invariant(params.contactId, "Missing contactId param");
+  const formData = await request.formData();
+  return updateContactById(params.contactId, {
+    favorite: formData.get("favorite") === "true"
+  })
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  const navigate = useNavigate();
+  return (
+    
+      <div className="contact-error">
+        <h1>Your contact has left the building.</h1>
+        <p>
+        {isRouteErrorResponse(error)
+            ? `${error.status} ${error.statusText}`
+            : error instanceof Error
+            ? error.message
+            : "Unknown Error"}
+        </p>
+        <div>
+        <button className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" onClick={() => navigate(-1)}>Back to safety</button>
+        </div>
+      </div>
+  );
+}
+
+export default function Contact() {
+  const contact = useLoaderData<typeof loader>();
+  return (
+    <div id="contact" className="py-4 px-4">
+      <div>
+        <img
+          alt={`${contact.first} ${contact.last} avatar`}
+          key={contact.avatar}
+          src={contact.avatar}
+        />
+      </div>
+
+      <div>
+        <h1>
+          {contact.first || contact.last ? (
+            <>
+              {contact.first} {contact.last}
+            </>
+          ) : (
+            <i>No Name</i>
+          )}{" "}
+          <Favorite contact={contact} />
+        </h1>
+
+        {contact.twitter ? (
+          <p>
+            <a
+              href={`https://twitter.com/${contact.twitter}`}
+            >
+              {contact.twitter}
+            </a>
+          </p>
+        ) : null}
+
+        {contact.notes ? <p>{contact.notes}</p> : null}
+
+        <div className="contact-actions">
+          <Form action="edit">
+            <button className="bg-white hover:bg-gray-100 text-blue-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="submit">Editar</button>
+          </Form>
+
+          <Form
+            action="delete"
+            method="post"
+            onSubmit={(event) => {
+              const response = confirm(
+                "Please confirm you want to delete this record."
+              );
+              if (!response) {
+                event.preventDefault();
+              }
+            }}
+          >
+            <button className="bg-white hover:bg-gray-100 text-red-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="submit">Deletar</button>
+          </Form>
+          <Link to="/contacts">
+            <button className="bg-white hover:bg-gray-100 text-blue-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="submit">Voltar</button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const Favorite: FunctionComponent<{
+  contact: Pick<ContactRecord, "favorite">;
+}> = ({ contact }) => {
+  const favorite = contact.favorite;
+  const fetcher = useFetcher();
+
+  return (
+    <fetcher.Form method="post">
+      <button
+        aria-label={
+          favorite
+            ? "Remove from favorites"
+            : "Add to favorites"
+        }
+        name="favorite" // Action function get the data based on the name property, and updated
+        value={favorite ? "false" : "true"}
+      >
+        {favorite ? "★" : "☆"}
+      </button>
+    </fetcher.Form>
+  );
+};
