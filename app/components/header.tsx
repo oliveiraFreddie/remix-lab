@@ -36,7 +36,7 @@ export default function Header() {
         </div>
 
         <div className="md:hidden">
-          <button className="text-white" onClick={toggleMenu}>
+          <button className="text-white bg-gray-800 hover:bg-gray-900" onClick={toggleMenu}>
             {showMenu ? (
               <svg
                 className="w-6 h-6"

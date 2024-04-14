@@ -1,4 +1,4 @@
-import { Form, useLoaderData, useRouteError, isRouteErrorResponse, useNavigate, useFetcher } from "@remix-run/react";
+import { Form, useLoaderData, useRouteError, isRouteErrorResponse, useNavigate, useFetcher, Link } from "@remix-run/react";
 import { type ActionFunctionArgs, json, type LoaderFunctionArgs } from "@remix-run/node";
 import type { FunctionComponent } from "react";
 
@@ -39,7 +39,7 @@ export function ErrorBoundary() {
             : "Unknown Error"}
         </p>
         <div>
-          <button onClick={() => navigate(-1)}>Back to safety</button>
+        <button className="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow" onClick={() => navigate(-1)}>Back to safety</button>
         </div>
       </div>
   );
@@ -47,9 +47,8 @@ export function ErrorBoundary() {
 
 export default function Contact() {
   const contact = useLoaderData<typeof loader>();
-  const navigate = useNavigate();
   return (
-    <div id="contact">
+    <div id="contact" className="py-4 px-4">
       <div>
         <img
           alt={`${contact.first} ${contact.last} avatar`}
@@ -82,8 +81,28 @@ export default function Contact() {
 
         {contact.notes ? <p>{contact.notes}</p> : null}
 
-        <div>
-            <button onClick={() => navigate(-1)}>Back to Contacts</button>
+        <div className="contact-actions">
+          <Form action="edit">
+            <button className="bg-white hover:bg-gray-100 text-blue-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="submit">Editar</button>
+          </Form>
+
+          <Form
+            action="delete"
+            method="post"
+            onSubmit={(event) => {
+              const response = confirm(
+                "Please confirm you want to delete this record."
+              );
+              if (!response) {
+                event.preventDefault();
+              }
+            }}
+          >
+            <button className="bg-white hover:bg-gray-100 text-red-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="submit">Deletar</button>
+          </Form>
+          <Link to="/contacts">
+            <button className="bg-white hover:bg-gray-100 text-blue-500 font-semibold py-2 px-4 border border-gray-400 rounded shadow" type="submit">Voltar</button>
+          </Link>
         </div>
       </div>
     </div>
